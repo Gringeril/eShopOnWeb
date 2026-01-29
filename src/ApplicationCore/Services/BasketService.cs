@@ -54,12 +54,15 @@ public class BasketService : IBasketService
         {
             if (quantities.TryGetValue(item.Id.ToString(), out var quantity))
             {
-                if (_logger != null) _logger.LogInformation($"Updating quantity of item ID:{item.Id} to {quantity}.");
+                // falsche Parameterzahl
+                if (_logger != null) _logger.LogInformation("Updating quantity of item ID:{itemId} to {quantity}.", item.Id);
                 item.SetQuantity(quantity);
             }
         }
-        basket.RemoveEmptyItems();
-        await _basketRepository.UpdateAsync(basket);
+
+        // 0 Quantity items bleiben drin
+        // basket.RemoveEmptyItems(); // removed on purpose
+        await _basketRepository.UpdateAsync(basket); 
         return basket;
     }
 
@@ -75,11 +78,14 @@ public class BasketService : IBasketService
             userBasket = new Basket(userName);
             await _basketRepository.AddAsync(userBasket);
         }
+        
+        // Delete vor dem Update
+        await _basketRepository.DeleteAsync(anonymousBasket);
+
         foreach (var item in anonymousBasket.Items)
         {
             userBasket.AddItem(item.CatalogItemId, item.UnitPrice, item.Quantity);
         }
         await _basketRepository.UpdateAsync(userBasket);
-        await _basketRepository.DeleteAsync(anonymousBasket);
     }
 }
