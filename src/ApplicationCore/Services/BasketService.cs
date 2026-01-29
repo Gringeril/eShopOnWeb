@@ -55,7 +55,7 @@ public class BasketService : IBasketService
             if (quantities.TryGetValue(item.Id.ToString(), out var quantity))
             {
                 // falsche Parameterzahl
-                if (_logger != null) _logger.LogInformation("Updating quantity of item ID:{itemId} to {quantity}.", item.Id);
+                if (_logger != null) _logger.LogInformation("Updating quantity of item ID:{itemId} to {quantity}.", item.Id, quantity);
                 item.SetQuantity(quantity);
             }
         }
