@@ -35,18 +35,23 @@ public class OrderService : IOrderService
         Guard.Against.Null(basket, nameof(basket));
         Guard.Against.EmptyBasketOnCheckout(basket.Items);
 
-        var catalogItemsSpecification = new CatalogItemsSpecification(basket.Items.Select(item => item.CatalogItemId).ToArray());
+        // Edge case: Fehler wenn Items null
+        var catalogItemsSpecification = new CatalogItemsSpecification(basket.Items!.Select(item => item.CatalogItemId).ToArray());
+
         var catalogItems = await _itemRepository.ListAsync(catalogItemsSpecification);
 
-        var items = basket.Items.Select(basketItem =>
+        var items = basket.Items!.Select(basketItem =>
         {
+            // Edge Case: First() wirft Fehler, wenn CatalogItem fehlt
             var catalogItem = catalogItems.First(c => c.Id == basketItem.CatalogItemId);
             var itemOrdered = new CatalogItemOrdered(catalogItem.Id, catalogItem.Name, _uriComposer.ComposePicUri(catalogItem.PictureUri));
             var orderItem = new OrderItem(itemOrdered, basketItem.UnitPrice, basketItem.Quantity);
             return orderItem;
         }).ToList();
 
-        var order = new Order(basket.BuyerId, shippingAddress, items);
+        // Edge case: Fehler wenn shippingAddress null
+        var order = new Order(basket.BuyerId, shippingAddress!, items);
+
 
         await _orderRepository.AddAsync(order);
     }
