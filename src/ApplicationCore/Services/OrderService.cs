@@ -33,6 +33,7 @@ public class OrderService : IOrderService
         var basket = await _basketRepository.FirstOrDefaultAsync(basketSpec);
 
         Guard.Against.Null(basket, nameof(basket));
+        Guard.Against.Null(shippingAddress, nameof(shippingAddress));
         Guard.Against.Null(basket.Items, nameof(basket.Items));
         Guard.Against.EmptyBasketOnCheckout(basket.Items);
 
@@ -51,7 +52,6 @@ public class OrderService : IOrderService
             return orderItem;
         }).ToList();
 
-        Guard.Against.Null(shippingAddress, nameof(shippingAddress));
         var order = new Order(basket.BuyerId, shippingAddress, items);
 
         await _orderRepository.AddAsync(order);
