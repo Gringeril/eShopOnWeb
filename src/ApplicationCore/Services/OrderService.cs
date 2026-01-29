@@ -52,6 +52,7 @@ public class OrderService : IOrderService
         // Edge case: Fehler wenn shippingAddress null
         var order = new Order(basket.BuyerId, shippingAddress!, items);
 
+        // ToDo: zusätzliche Validierung
 
         await _orderRepository.AddAsync(order);
     }
