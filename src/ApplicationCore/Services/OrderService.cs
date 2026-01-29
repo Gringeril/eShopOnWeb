@@ -42,7 +42,7 @@ public class OrderService : IOrderService
 
         var catalogItems = await _itemRepository.ListAsync(catalogItemsSpecification);
 
-        var items = basket.Items!.Select(basketItem =>
+        var items = basket.Items.Select(basketItem =>
         {
             var catalogItem = catalogItems.FirstOrDefault(c => c.Id == basketItem.CatalogItemId);
             Guard.Against.Null(catalogItem, nameof(catalogItem));
