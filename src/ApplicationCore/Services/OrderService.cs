@@ -33,14 +33,20 @@ public class OrderService : IOrderService
         var basket = await _basketRepository.FirstOrDefaultAsync(basketSpec);
 
         Guard.Against.Null(basket, nameof(basket));
+        Guard.Against.Null(shippingAddress, nameof(shippingAddress));
+        Guard.Against.Null(basket.Items, nameof(basket.Items));
         Guard.Against.EmptyBasketOnCheckout(basket.Items);
 
-        var catalogItemsSpecification = new CatalogItemsSpecification(basket.Items.Select(item => item.CatalogItemId).ToArray());
+        var catalogItemsSpecification = new CatalogItemsSpecification(
+            basket.Items.Select(item => item.CatalogItemId).ToArray());
+
         var catalogItems = await _itemRepository.ListAsync(catalogItemsSpecification);
 
         var items = basket.Items.Select(basketItem =>
         {
-            var catalogItem = catalogItems.First(c => c.Id == basketItem.CatalogItemId);
+            var catalogItem = catalogItems.FirstOrDefault(c => c.Id == basketItem.CatalogItemId);
+            Guard.Against.Null(catalogItem, nameof(catalogItem));
+
             var itemOrdered = new CatalogItemOrdered(catalogItem.Id, catalogItem.Name, _uriComposer.ComposePicUri(catalogItem.PictureUri));
             var orderItem = new OrderItem(itemOrdered, basketItem.UnitPrice, basketItem.Quantity);
             return orderItem;
